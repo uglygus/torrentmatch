@@ -12,11 +12,22 @@ def normalize_path(path: Path) -> Path:
 
 
 def get_torrent_files(torrent_dir: Path) -> list[tuple[Path, Torrent]]:
+    paths = [f for f in torrent_dir.glob("*.torrent*")]
+
+    # for p in paths:
+    #     print("p == ", str(p))
+
     return [(f, Torrent.from_file(f)) for f in torrent_dir.glob("*.torrent*")]
 
 
-def get_files_from_torrent(torrent: Torrent) -> set[Path]:
-    return {normalize_path(Path(file_path)) for file_path, _ in torrent.files}
+def files_in_torrent(torrent: Torrent) -> set[Path]:
+    files = {normalize_path(Path(file_path)) for file_path, _ in torrent.files}
+    # for f in files:
+    #     print("f == ", str(f))
+
+    #     if "/" in str(f):
+    #         print("   is a dir...")
+    return files
 
 
 def get_media_files(media_dir: Path) -> set[Path]:
@@ -36,7 +47,7 @@ def compare_torrents_with_media(torrent_dir: Path, media_dir: Path):
     missing_by_torrent = defaultdict(list)
 
     for torrent_path, torrent in torrents:
-        files = get_files_from_torrent(torrent)
+        files = files_in_torrent(torrent)
         all_torrent_files.update(files)
         for f in files:
             if f not in media_files:
@@ -49,19 +60,19 @@ def compare_torrents_with_media(torrent_dir: Path, media_dir: Path):
         for f in sorted(extra_media_files):
             print(f"  {f}")
     else:
-        print("✅ All media files are referenced in torrents.")
+        print("All media files are referenced in torrents.")
 
     print()
 
     # Report missing files per torrent
     if missing_by_torrent:
-        print("⚠️  Files referenced by torrents but missing from media directory:")
+        print("Files referenced by torrents but missing from media directory:")
         for torrent_name, files in sorted(missing_by_torrent.items()):
             print(f"  {torrent_name}")
             for f in sorted(files):
                 print(f"    {f}")
     else:
-        print("✅ All torrent files are accounted for in media.")
+        print("All torrent files are accounted for in media.")
 
 
 if __name__ == "__main__":
