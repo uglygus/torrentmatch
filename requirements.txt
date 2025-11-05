@@ -1,1 +1,1 @@
-torrentool
+torrentool==1.2.0
